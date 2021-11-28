@@ -7,6 +7,11 @@ use JWTAuth;
 use Exception;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Http\Middleware\BaseMiddleware;
+use Tymon\JWTAuth\Exceptions\JWTException;
+use Tymon\JWTAuth\Exceptions\TokenExpiredException;
+use Tymon\JWTAuth\Exceptions\TokenInvalidException;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class JwtMiddleware extends BaseMiddleware
 {
@@ -17,19 +22,35 @@ class JwtMiddleware extends BaseMiddleware
      * @param  \Closure  $next
      * @return mixed
      */
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next, ...$roles)
     {
         try {
-            $user = JWTAuth::parseToken()->authenticate();
-        } catch (Exception $e) {
-            if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException){
-                return response()->json(['message' => 'Token is Invalid'], 404);
-            }else if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenExpiredException){
-                return response()->json(['message' => 'Token is Expired'], 404);
-            }else{
-                return response()->json(['message' => 'Authorization Token not found'], 404);
-            }
+            //Access token from the request        
+            $token = JWTAuth::parseToken();
+            //Try authenticating user       
+            $user = $token->authenticate();
+        } catch (TokenExpiredException $e) {
+            //Thrown if token has expired        
+            return $this->unauthorized('Your token has expired. Please, login again.');
+        } catch (TokenInvalidException $e) {
+            //Thrown if token invalid
+            return $this->unauthorized('Your token is invalid. Please, login again.');
+        }catch (JWTException $e) {
+            //Thrown if token was not found in the request.
+            return $this->unauthorized('Please, attach a Bearer Token to your request');
         }
-        return $next($request);
+        //If user was authenticated successfully and user is in one of the acceptable roles, send to next request.
+        if ($user && in_array($user->rol->name, $roles) || empty($roles) ) {
+            return $next($request);
+        }
+    
+        return $this->unauthorized();
+    }
+
+    private function unauthorized($message = null){
+        return response()->json([
+            'message' => $message ? $message : 'You are unauthorized to access this resource',
+            'success' => false
+        ], 401);
     }
 }

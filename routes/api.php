@@ -34,8 +34,58 @@ Route::group([
 
 
 Route::group(['middleware' => ['jwt.verify']], function () {
-    Route::apiResource('cities', App\Http\Controllers\CityController::class);
-    Route::apiResource('condominia', App\Http\Controllers\CondominiumController::class);
-    Route::apiResource('departments', App\Http\Controllers\DepartmentController::class);
-    Route::apiResource('persons', App\Http\Controllers\PersonController::class);
+    Route::get('cities', [App\Http\Controllers\CityController::class , 'index']);
+    Route::get('city/{id}', [App\Http\Controllers\CityController::class , 'show']);
+
+    Route::get('condominia', [App\Http\Controllers\CondominiumController::class , 'index']);
+    Route::get('condominia/{id}', [App\Http\Controllers\CondominiumController::class , 'show']);
+
+    Route::get('typeProperties', [App\Http\Controllers\TypePropertyController::class , 'index']);
+    Route::get('typeProperty/{id}', [App\Http\Controllers\TypePropertyController::class , 'show']);
+
+    Route::get('people', [App\Http\Controllers\PersonController::class , 'index']);
+    Route::get('person/{id}', [App\Http\Controllers\PersonController::class , 'show']);
+
+    Route::get('departments', [App\Http\Controllers\DepartmentController::class , 'index']);
+    Route::get('department/{id}', [App\Http\Controllers\DepartmentController::class , 'show']);
+
+    Route::get('typePersons', [App\Http\Controllers\TypePersonController::class , 'index']);
+    Route::get('typePerson/{id}', [App\Http\Controllers\TypePersonController::class , 'show']);
+
+    Route::get('sessions', [App\Http\Controllers\SessionController::class , 'index']);
+    Route::get('session/{id}', [App\Http\Controllers\SessionController::class , 'show']);
+
+    Route::get('condominium', [App\Http\Controllers\CondominiumController::class , 'index']);
+    Route::get('condominium/{id}', [App\Http\Controllers\CondominiumController::class , 'show']);
+});
+
+Route::group(['middleware' => ['jwt.verify:admin']], function () {
+
+    Route::post('city', [App\Http\Controllers\CityController::class , 'store']);
+    Route::put('city/{id}', [App\Http\Controllers\CityController::class , 'update']);
+    Route::delete('city/{id}', [App\Http\Controllers\CityController::class , 'destroy']);
+
+    Route::post('condominia', [App\Http\Controllers\CondominiumController::class , 'store']);
+    Route::put('condominia/{id}', [App\Http\Controllers\CondominiumController::class , 'update']);
+    Route::delete('condominia/{id}', [App\Http\Controllers\CondominiumController::class , 'destroy']);
+
+    Route::post('typeProperty', [App\Http\Controllers\TypePropertyController::class , 'store']);
+    Route::put('typeProperty/{id}', [App\Http\Controllers\TypePropertyController::class , 'update']);
+    Route::delete('typeProperty/{id}', [App\Http\Controllers\TypePropertyController::class , 'destroy']);
+
+    // Route::post('person', [App\Http\Controllers\PersonController::class , 'store']);
+    Route::put('person/{id}', [App\Http\Controllers\PersonController::class , 'update']);
+    Route::delete('person/{id}', [App\Http\Controllers\PersonController::class , 'destroy']);
+
+    Route::post('department', [App\Http\Controllers\DepartmentController::class , 'store']);
+    Route::put('department/{id}', [App\Http\Controllers\DepartmentController::class , 'update']);
+    Route::delete('department/{id}', [App\Http\Controllers\DepartmentController::class , 'destroy']);
+
+    Route::post('typePerson', [App\Http\Controllers\TypePersonController::class , 'store']);
+    Route::put('typePerson/{id}', [App\Http\Controllers\TypePersonController::class , 'update']);
+    Route::delete('typePerson/{id}', [App\Http\Controllers\TypePersonController::class , 'destroy']);
+
+    Route::post('condominium', [App\Http\Controllers\CondominiumController::class , 'store']);
+    Route::put('condominium/{id}', [App\Http\Controllers\CondominiumController::class , 'update']);
+    
 });

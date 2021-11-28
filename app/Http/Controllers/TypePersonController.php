@@ -4,6 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\TypePerson;
 use Illuminate\Http\Request;
+use App\Http\Resources\TypePersonResource;
+use App\Http\Resources\TypePersonResourceCollection;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Response;
+use App\Constants;
+use Exception;
 
 class TypePersonController extends Controller
 {
@@ -15,6 +21,16 @@ class TypePersonController extends Controller
     public function index()
     {
         //
+        try {
+
+            $typepersons = TypeProperty::where("status", "=" , Constants::ACTIVE)->get()->sortByDesc('created_at');
+            return (new TypePersonResourceCollection($typepersons))->response();
+
+        } catch (Exception $e) {
+
+            return response()->json(array("message" => "error"), Response::HTTP_NOT_FOUND);
+        }
+        
     }
 
     /**
@@ -22,54 +38,69 @@ class TypePersonController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function show($id)
     {
         //
+        try {
+
+            $typeperson = TypePerson::find($id);
+            return response()->json($typeperson, 200);
+
+        } catch (Exception $e) {
+            return response()->json(array("message" => "error"), Response::HTTP_NOT_FOUND);
+        }
+        
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         //
+        $request->validate([
+            'description' => 'required|string|max:200',
+        ]);
+
+        try {
+
+            $typeperson = new TypePerson();
+
+            $typeperson->description = $request->input('description');
+            $typeperson->status = Constants::ACTIVE;
+
+            $typeperson->save();
+
+            Log::info("TypePerson ID {$typeperson->id} created successfully.");
+
+            return (new TypePersonResource($typeperson))->response()->setStatusCode(Response::HTTP_CREATED);
+
+        } catch (Exception $e) {
+            return response()->json(array("message" => "error"), Response::HTTP_NOT_FOUND);
+        }
+        
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\TypePerson  $typePerson
-     * @return \Illuminate\Http\Response
-     */
-    public function show(TypePerson $typePerson)
+    
+    public function update(Request $request, $id)
     {
         //
-    }
+        $request->validate([
+            'description' => 'required|string|max:200',
+        ]);
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\TypePerson  $typePerson
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(TypePerson $typePerson)
-    {
-        //
-    }
+        try {
+            $typeperson = TypePerson::find($id);
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\TypePerson  $typePerson
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, TypePerson $typePerson)
-    {
-        //
+            $typeperson->description = $request->input('description');
+
+            $typeperson->save();
+
+            Log::info("TypePerson ID {$typeperson->id} created successfully.");
+
+            return response()->json(array("message" => "OK"),  Response::OK); 
+
+        } catch (Exception $e) {
+            return response()->json(array("message" => "error"), Response::HTTP_NOT_FOUND);
+        }
+        
     }
 
     /**
@@ -78,8 +109,20 @@ class TypePersonController extends Controller
      * @param  \App\Models\TypePerson  $typePerson
      * @return \Illuminate\Http\Response
      */
-    public function destroy(TypePerson $typePerson)
+    public function destroy($id)
     {
         //
+        try {
+
+            $typeperson = TypePerson::find($id);
+
+            $typeperson->status = Constants::DESACTIVE;
+
+            return response()->json(array("message" => "OK"), Response::OK); 
+
+        } catch (Exception $e) {
+            return response()->json(array("message" => "error"), Response::HTTP_NOT_FOUND);
+        }
+        
     }
 }

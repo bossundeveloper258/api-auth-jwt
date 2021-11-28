@@ -8,6 +8,8 @@ use App\Http\Resources\PersonResource;
 use App\Http\Resources\PersonResourceCollection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Response;
+use App\Constants;
+use Exception;
 
 class PersonController extends Controller
 {
@@ -19,8 +21,13 @@ class PersonController extends Controller
     public function index()
     {
         //
-        $persons = Person::all()->sortByDesc('created_at');
-        return (new PersonResourceCollection($persons))->response();
+        try {
+            $persons = Person::where("status", "=" , Constants::ACTIVE)->get()->sortByDesc('created_at');
+            return (new PersonResourceCollection($persons))->response();
+        } catch (Exception $e) {
+            return response()->json(array("message" => "error"), Response::HTTP_NOT_FOUND);
+        }
+        
     }
 
     /**
@@ -50,10 +57,12 @@ class PersonController extends Controller
      * @param  \App\Models\Person  $person
      * @return \Illuminate\Http\Response
      */
-    public function show(Person $person)
+    public function show($id)
     {
         //
-        return response()->json(new PersonResource($person), 200);
+        $person = Person::with('type_person')->find($id);
+        return response()->json($person, 200);
+        
     }
 
     /**
@@ -74,10 +83,9 @@ class PersonController extends Controller
      * @param  \App\Models\Person  $person
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Person $person)
+    public function update(Request $request, $id)
     {
         //
-
         $validator = Validator::make($request->all(), [
             'name' => 'required',
             'lastname' => 'required',
@@ -88,19 +96,26 @@ class PersonController extends Controller
             "id_type_person" => 'required',
         ]);
 
-        $person->name = $request->input('name');
-        $person->lastname = $request->input('lastname');
-        $person->email = $request->input('email');
-        $person->nuip = $request->input('nuip');
-        $person->phone = $request->input('phone');
-        $person->id_city = $request->input('id_city');
-        $person->id_type_person = $request->input('id_type_person');
+        try {
+            $person = Person::find($id);
 
-        $person->save();
+            $person->name = $request->input('name');
+            $person->lastname = $request->input('lastname');
+            $person->email = $request->input('email');
+            $person->nuip = $request->input('nuip');
+            $person->phone = $request->input('phone');
+            $person->id_city = $request->input('id_city');
+            $person->id_type_person = $request->input('id_type_person');
 
-        Log::info("Person ID {$person->id} updated successfully.");
+            $person->save();
 
-        return (new PersonResource($person))->response();
+            Log::info("Person ID {$person->id} updated successfully.");
+
+            return response()->json(array("message" => "OK"), Response::OK);
+        } catch (Exception $e) {
+            return response()->json(array("message" => "error"), Response::HTTP_NOT_FOUND);
+        }
+         
     }
 
     /**
@@ -111,6 +126,18 @@ class PersonController extends Controller
      */
     public function destroy(Person $person)
     {
-        //
+        try {
+            $person = Person::find($id);
+
+            $person->status = Constants::DESACTIVE;
+
+            $person->save();
+
+            Log::info("Person ID {$person->id} updated successfully.");
+
+            return response()->json(array("message" => "OK"), Response::OK);
+        } catch (Exception $e) {
+            return response()->json(array("message" => "error"), Response::HTTP_NOT_FOUND);
+        }
     }
 }

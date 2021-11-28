@@ -8,4 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Department extends Model
 {
     use HasFactory;
+
+    public function cities()
+    {
+        return $this->belongsTo(City::class,'id_department' , 'id');
+    }
 }

@@ -4,6 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Session;
 use Illuminate\Http\Request;
+use App\Http\Resources\SessionResource;
+use App\Http\Resources\SessionResourceCollection;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Response;
+use App\Constants;
+use Exception;
 
 class SessionController extends Controller
 {
@@ -15,6 +21,14 @@ class SessionController extends Controller
     public function index()
     {
         //
+        try {
+
+            $session = Session::all()->sortByDesc('created_at');
+            return (new SessionResourceCollection($session))->response();
+
+        } catch (Exception $e) {
+            return response()->json(array("message" => "error"), Response::HTTP_NOT_FOUND);
+        }
     }
 
     /**
@@ -25,6 +39,28 @@ class SessionController extends Controller
     public function create()
     {
         //
+        $request->validate([
+            'id_user' => 'required',
+            // 'session_at' => 'required',
+            'token' => 'required',
+            'device' => 'required',
+        ]);
+
+        try {
+            $session = new Session();
+            $session->id_user = $request->input('id_user');
+            $session->session_at = date('Y-m-d H:i:s'); 
+            $session->token = $request->input('token'); 
+            $session->device = $request->input('device'); 
+            
+            $session->save();
+
+            Log::info("Session ID {$session->id} created successfully.");
+
+            return (new SessionResource($session))->response()->setStatusCode(Response::HTTP_CREATED);
+        } catch (Exception $e) {
+            return response()->json(array("message" => "error"), Response::HTTP_NOT_FOUND);
+        }
     }
 
     /**
@@ -44,9 +80,14 @@ class SessionController extends Controller
      * @param  \App\Models\Session  $session
      * @return \Illuminate\Http\Response
      */
-    public function show(Session $session)
+    public function show($id)
     {
-        //
+        try {
+            $session = Session::with('user')->find($id);
+            return response()->json($session, 200);
+        } catch (Exception $e) {
+            return response()->json(array("message" => "error"), Response::HTTP_NOT_FOUND);
+        }
     }
 
     /**

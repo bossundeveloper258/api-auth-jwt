@@ -8,6 +8,8 @@ use App\Http\Resources\DepartmentResource;
 use App\Http\Resources\DepartmentResourceCollection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Response;
+use App\Constants;
+use Exception;
 
 class DepartmentController extends Controller
 {
@@ -19,8 +21,13 @@ class DepartmentController extends Controller
     public function index()
     {
         //
-        $departments = Department::all()->sortByDesc('created_at');
-        return (new DepartmentResourceCollection($departments))->response();
+        try {
+            $departments = Department::where("status", "=" , Constants::ACTIVE)->get()->sortByDesc('created_at');
+            return (new DepartmentResourceCollection($departments))->response();
+        } catch (Exception $e) {
+            return response()->json(array("message" => "error"), Response::HTTP_NOT_FOUND);
+        }
+        
     }
 
     /**
@@ -35,72 +42,57 @@ class DepartmentController extends Controller
             'name' => 'required|string|max:150',
         ]);
 
-        $department = new Department();
-        $department->name = $request->input('name');
-        $department->status = true;
+        try {
+            $department = new Department();
+            $department->name = $request->input('name');
+            $department->status = true;
 
-        $department->save();
+            $department->save();
 
-        Log::info("Department ID {$department->id} created successfully.");
+            Log::info("Department ID {$department->id} created successfully.");
 
-        return (new DepartmentResource($department))->response()->setStatusCode(Response::HTTP_CREATED);
+            return (new DepartmentResource($department))->response()->setStatusCode(Response::HTTP_CREATED);
+        } catch (Exception $e) {
+            return response()->json(array("message" => "error"), Response::HTTP_NOT_FOUND);
+        }
+
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+    public function show($id)
     {
         //
+        try {
+
+            $department = Department::find($id);
+            return response()->json($department, Response::OK);
+
+        } catch (Exception $e) {
+            return response()->json(array("message" => "error"), Response::HTTP_NOT_FOUND);
+        }
+        
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Department  $department
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Department $department)
-    {
-        //
-        return response()->json(new DepartmentResource($department), 200);
-    }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Department  $department
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Department $department)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Department  $department
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Department $department)
+    public function update(Request $request, $id)
     {
         //
         $request->validate([
             'name' => 'required|string|max:150',
         ]);
 
-        $department->name = $request->input('name');
+        try {
+            $department = Department::find($id);
+            $department->name = $request->input('name');
 
-        $department->save();
+            $department->save();
 
-        Log::info("Department ID {$department->id} updated successfully.");
+            Log::info("Department ID {$department->id} updated successfully.");
 
-        return (new DepartmentResource($department))->response();
+            return response()->json(array("message" => "OK"), Response::OK); 
+        } catch (Exception $e) {
+            return response()->json(array("message" => "error"), Response::HTTP_NOT_FOUND);
+        }
+        
     }
 
     /**
@@ -109,8 +101,19 @@ class DepartmentController extends Controller
      * @param  \App\Models\Department  $department
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Department $department)
+    public function destroy($id)
     {
-        //
+        try {
+            $department = Department::find($id);
+            $department->status = Constants::DESACTIVE;
+
+            $department->save();
+
+            Log::info("Department ID {$department->id} updated successfully.");
+
+            return response()->json(array("message" => "OK"), Response::OK); 
+        } catch (Exception $e) {
+            return response()->json(array("message" => "error"), Response::HTTP_NOT_FOUND);
+        }
     }
 }

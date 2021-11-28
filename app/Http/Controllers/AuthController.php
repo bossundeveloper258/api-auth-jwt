@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Rol;
 use App\Models\Session;
 use App\Models\Person;
+use App\Constants;
 
 class AuthController extends Controller
 {
@@ -33,6 +34,14 @@ class AuthController extends Controller
         if (! $token = auth()->attempt($credentials)) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
+
+        $session = new Session();
+        $session->id_user = Auth::id();
+        $session->session_at = date('Y-m-d H:i:s'); 
+        $session->token = $token; 
+        $session->device = ($request->input('device') != null )? $request->input('device') : "web"; 
+        
+        $session->save();
 
         return $this->respondWithToken($token);
     }
@@ -108,15 +117,15 @@ class AuthController extends Controller
                 "email" => $request->email,
                 "phone" => $request->phone,
                 "status" => true,
-                "id_city" => 1,
-                "id_type_person" => 1,
+                "id_city" => $request->id_city,
+                "id_type_person" => $request->id_type_person,
             )
         );
 
         $user = User::create(
             array(
                 "password" => bcrypt($request->password),
-                "id_rol" => 2,
+                "id_rol" => Constants::USER,
                 "email" => $request->email,
                 "name" => $request->name,
                 "id_person" => $person->id

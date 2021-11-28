@@ -9,6 +9,8 @@ use Illuminate\Http\Response;
 use App\Http\Resources\CondominiumResource;
 use App\Http\Resources\CondominiumResourceCollection;
 
+use Illuminate\Support\Facades\Auth;
+
 class CondominiumController extends Controller
 {
     /**
@@ -23,22 +25,6 @@ class CondominiumController extends Controller
         return (new CondominiumResourceCollection($condominium))->response();
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         //
@@ -50,6 +36,12 @@ class CondominiumController extends Controller
             'neighborhood' => 'required|max:200',
         ]);
 
+        try {
+            //code...
+        } catch (Exception $e) {
+            return response()->json(array("message" => "error"), Response::HTTP_NOT_FOUND);
+        }
+
         $condominium = new Condominium();
         $condominium->name = $request->input('name');
         $condominium->address = $request->input('address'); 
@@ -59,45 +51,24 @@ class CondominiumController extends Controller
 
         $condominium->save();
 
+        $personIds = [Auth()->user->person->id];
+        $condominium->persons()->attach($personIds);
+
         Log::info("City ID {$condominium->id} created successfully.");
 
         return (new CondominiumResource($condominium))->response()->setStatusCode(Response::HTTP_CREATED);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Condominium  $condominium
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Condominium $condominium)
+
+    public function show($id)
     {
         //
-        return response()->json(new CondominiumResource($condominium), 200);
+        $condominium = Condominium::find($id);
+        return response()->json($condominium, 200);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Condominium  $condominium
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Condominium $condominium)
-    {
-        //
 
-        
-        
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Condominium  $condominium
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Condominium $condominium)
+    public function update(Request $request, $id)
     {
         //
         $request->validate([
@@ -107,7 +78,7 @@ class CondominiumController extends Controller
             'address' => 'required|max:150',
             'neighborhood' => 'required|max:200',
         ]);
-
+        $condominium = Condominium::find($id);
         $condominium->name = $request->input('name');
         $condominium->address = $request->input('address'); 
         $condominium->neighborhood = $request->input('neighborhood');
@@ -118,15 +89,9 @@ class CondominiumController extends Controller
 
         Log::info("Condominium ID {$condominium->id} updated successfully.");
 
-        return (new CondominiumResource($condominium))->response();
+        return response()->json(array("message" => "OK"), Response::OK);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Condominium  $condominium
-     * @return \Illuminate\Http\Response
-     */
     public function destroy(Condominium $condominium)
     {
         //

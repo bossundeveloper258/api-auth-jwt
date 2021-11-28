@@ -8,6 +8,8 @@ use App\Http\Resources\CityResource;
 use App\Http\Resources\CityResourceCollection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Response;
+use App\Constants;
+use Exception;
 
 class CityController extends Controller
 {
@@ -19,26 +21,22 @@ class CityController extends Controller
     public function index()
     {
         //
-        $cities = City::all()->sortByDesc('created_at');
-        return (new CityResourceCollection($cities))->response();
+        try {
+
+            $cities = City::where("status", "=" , Constants::ACTIVE)->get()->sortByDesc('created_at');
+            return (new CityResourceCollection($cities))->response();
+
+        } catch (Exception $e) {
+            return response()->json(array("message" => "error"), Response::HTTP_NOT_FOUND);
+        }
+        
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         //
@@ -47,49 +45,32 @@ class CityController extends Controller
             'id_department' => 'required',
         ]);
 
-        $city = new City();
-        $city->name = $request->input('name');
-        $city->id_department = $request->input('id_department'); 
-        $city->status = true;
+        try {
+            $city = new City();
+            $city->name = $request->input('name');
+            $city->id_department = $request->input('id_department'); 
+            $city->status = Constants::ACTIVE;
 
-        $city->save();
+            $city->save();
 
-        Log::info("City ID {$city->id} created successfully.");
+            Log::info("City ID {$city->id} created successfully.");
 
-        return (new CityResource($city))->response()->setStatusCode(Response::HTTP_CREATED);
+            return (new CityResource($city))->response()->setStatusCode(Response::HTTP_CREATED);
+        } catch (Exception $e) {
+            return response()->json(array("message" => "error"), Response::HTTP_NOT_FOUND);
+        }
+
+        
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\City  $city
-     * @return \Illuminate\Http\Response
-     */
-    public function show(City $city)
+    public function show($id)
     {
         //
-        return response()->json(new CityResource($city), 200);
+        $city = City::with('departament')->find($id);
+        return response()->json($city, 200);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\City  $city
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(City $city)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\City  $city
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, City $city)
+    public function update(Request $request, $id)
     {
         //
 
@@ -97,15 +78,20 @@ class CityController extends Controller
             'name' => 'required|string|max:255',
             'id_department' => 'required',
         ]);
+        try {
+            $city = City::find($id);
+            $city->name = $request->input('name');
+            $city->id_department = $request->input('id_department'); 
+            
+            $city->save();
 
-        $city->name = $request->input('name');
-        $city->id_department = $request->input('id_department'); 
+            Log::info("City ID {$city->id} updated successfully.");
+
+            return response()->json(array("message" => "OK"), Response::OK); 
+        } catch (Exception $e) {
+            return response()->json(array("message" => "error"), Response::HTTP_NOT_FOUND);
+        }
         
-        $city->save();
-
-        Log::info("City ID {$city->id} updated successfully.");
-
-        return (new CityResource($city))->response();
     }
 
     /**
@@ -114,8 +100,18 @@ class CityController extends Controller
      * @param  \App\Models\City  $city
      * @return \Illuminate\Http\Response
      */
-    public function destroy(City $city)
+    public function destroy( $id )
     {
-        //
+        try {
+            $city = City::find($id);
+            $city->status = Constants::DESACTIVE;
+            $city->save();
+
+            Log::info("City ID {$city->id} updated successfully.");
+
+            return response()->json(array("message" => "OK"), Response::OK); 
+        } catch (Exception $e) {
+            return response()->json(array("message" => "error"), Response::HTTP_NOT_FOUND);
+        }
     }
 }
