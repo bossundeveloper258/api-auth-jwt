@@ -39,7 +39,8 @@ class AuthController extends Controller
         $session = new Session();
         $session->id_user = Auth::id();
         $session->session_at = date('Y-m-d H:i:s'); 
-        $session->token = $token; 
+        $session->token = "";//$token; 
+        $session->device = "";
         // $session->device = ($request->input('device') != null )? $request->input('device') : "web"; 
         
         $session->save();
