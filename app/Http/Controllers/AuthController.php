@@ -9,6 +9,7 @@ use App\Models\Rol;
 use App\Models\Session;
 use App\Models\Person;
 use App\Constants;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -39,7 +40,7 @@ class AuthController extends Controller
         $session->id_user = Auth::id();
         $session->session_at = date('Y-m-d H:i:s'); 
         $session->token = $token; 
-        $session->device = ($request->input('device') != null )? $request->input('device') : "web"; 
+        // $session->device = ($request->input('device') != null )? $request->input('device') : "web"; 
         
         $session->save();
 

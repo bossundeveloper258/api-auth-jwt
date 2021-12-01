@@ -8,7 +8,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Response;
 use App\Http\Resources\CondominiumResource;
 use App\Http\Resources\CondominiumResourceCollection;
-
+use App\Constants;
+use Exception;
 use Illuminate\Support\Facades\Auth;
 
 class CondominiumController extends Controller
@@ -89,7 +90,7 @@ class CondominiumController extends Controller
 
         Log::info("Condominium ID {$condominium->id} updated successfully.");
 
-        return response()->json(array("message" => "OK"), Response::OK);
+        return response()->json(array("message" => "OK"), Response::HTTP_OK);
     }
 
     public function destroy(Condominium $condominium)

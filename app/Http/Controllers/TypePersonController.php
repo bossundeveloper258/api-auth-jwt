@@ -23,7 +23,7 @@ class TypePersonController extends Controller
         //
         try {
 
-            $typepersons = TypeProperty::where("status", "=" , Constants::ACTIVE)->get()->sortByDesc('created_at');
+            $typepersons = TypePerson::where("status", "=" , Constants::ACTIVE)->get()->sortByDesc('created_at');
             return (new TypePersonResourceCollection($typepersons))->response();
 
         } catch (Exception $e) {
@@ -95,7 +95,7 @@ class TypePersonController extends Controller
 
             Log::info("TypePerson ID {$typeperson->id} created successfully.");
 
-            return response()->json(array("message" => "OK"),  Response::OK); 
+            return response()->json(array("message" => "OK"),  Response::HTTP_OK); 
 
         } catch (Exception $e) {
             return response()->json(array("message" => "error"), Response::HTTP_NOT_FOUND);
@@ -118,7 +118,7 @@ class TypePersonController extends Controller
 
             $typeperson->status = Constants::DESACTIVE;
 
-            return response()->json(array("message" => "OK"), Response::OK); 
+            return response()->json(array("message" => "OK"), Response::HTTP_OK); 
 
         } catch (Exception $e) {
             return response()->json(array("message" => "error"), Response::HTTP_NOT_FOUND);

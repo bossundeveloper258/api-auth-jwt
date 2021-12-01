@@ -108,7 +108,7 @@ class TypePropertyController extends Controller
     
             Log::info("TypeProperty ID {$typeProperty->id} update successfully.");
     
-            return response()->json(array("message" => "OK"), Response::OK); 
+            return response()->json(array("message" => "OK"), Response::HTTP_OK); 
 
         } catch (Exception $e) {
             return response()->json(array("message" => "error"), Response::HTTP_NOT_FOUND);
@@ -131,7 +131,7 @@ class TypePropertyController extends Controller
 
             $typeProperty->save();
 
-            return response()->json(array("message" => "OK"), Response::OK);
+            return response()->json(array("message" => "OK"), Response::HTTP_OK);
         } catch (Exception $e) {
             return response()->json(array("message" => "error"), Response::HTTP_NOT_FOUND);
         }

@@ -86,7 +86,7 @@ class PersonController extends Controller
     public function update(Request $request, $id)
     {
         //
-        $validator = Validator::make($request->all(), [
+        $request->validate([
             'name' => 'required',
             'lastname' => 'required',
             'email' => 'required',
@@ -95,6 +95,7 @@ class PersonController extends Controller
             "id_city" => 'required',
             "id_type_person" => 'required',
         ]);
+        
 
         try {
             $person = Person::find($id);
@@ -111,7 +112,7 @@ class PersonController extends Controller
 
             Log::info("Person ID {$person->id} updated successfully.");
 
-            return response()->json(array("message" => "OK"), Response::OK);
+            return response()->json(array("message" => "OK"), Response::HTTP_OK);
         } catch (Exception $e) {
             return response()->json(array("message" => "error"), Response::HTTP_NOT_FOUND);
         }
@@ -124,7 +125,7 @@ class PersonController extends Controller
      * @param  \App\Models\Person  $person
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Person $person)
+    public function destroy( $id)
     {
         try {
             $person = Person::find($id);
@@ -135,7 +136,7 @@ class PersonController extends Controller
 
             Log::info("Person ID {$person->id} updated successfully.");
 
-            return response()->json(array("message" => "OK"), Response::OK);
+            return response()->json(array("message" => "OK"), Response::HTTP_OK);
         } catch (Exception $e) {
             return response()->json(array("message" => "error"), Response::HTTP_NOT_FOUND);
         }

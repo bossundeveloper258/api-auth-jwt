@@ -39,6 +39,18 @@ class SessionController extends Controller
     public function create()
     {
         //
+        
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        //
         $request->validate([
             'id_user' => 'required',
             // 'session_at' => 'required',
@@ -61,17 +73,6 @@ class SessionController extends Controller
         } catch (Exception $e) {
             return response()->json(array("message" => "error"), Response::HTTP_NOT_FOUND);
         }
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
     }
 
     /**

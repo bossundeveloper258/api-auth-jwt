@@ -35,7 +35,7 @@ class DepartmentController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
         //
         $request->validate([
@@ -64,7 +64,7 @@ class DepartmentController extends Controller
         try {
 
             $department = Department::find($id);
-            return response()->json($department, Response::OK);
+            return response()->json($department, Response::HTTP_OK);
 
         } catch (Exception $e) {
             return response()->json(array("message" => "error"), Response::HTTP_NOT_FOUND);
@@ -88,7 +88,7 @@ class DepartmentController extends Controller
 
             Log::info("Department ID {$department->id} updated successfully.");
 
-            return response()->json(array("message" => "OK"), Response::OK); 
+            return response()->json(array("message" => "OK"), Response::HTTP_OK); 
         } catch (Exception $e) {
             return response()->json(array("message" => "error"), Response::HTTP_NOT_FOUND);
         }
@@ -111,7 +111,7 @@ class DepartmentController extends Controller
 
             Log::info("Department ID {$department->id} updated successfully.");
 
-            return response()->json(array("message" => "OK"), Response::OK); 
+            return response()->json(array("message" => "OK"), Response::HTTP_OK); 
         } catch (Exception $e) {
             return response()->json(array("message" => "error"), Response::HTTP_NOT_FOUND);
         }

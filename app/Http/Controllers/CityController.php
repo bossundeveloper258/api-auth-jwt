@@ -87,7 +87,7 @@ class CityController extends Controller
 
             Log::info("City ID {$city->id} updated successfully.");
 
-            return response()->json(array("message" => "OK"), Response::OK); 
+            return response()->json(array("message" => "OK"), Response::HTTP_OK); 
         } catch (Exception $e) {
             return response()->json(array("message" => "error"), Response::HTTP_NOT_FOUND);
         }
@@ -109,7 +109,7 @@ class CityController extends Controller
 
             Log::info("City ID {$city->id} updated successfully.");
 
-            return response()->json(array("message" => "OK"), Response::OK); 
+            return response()->json(array("message" => "OK"), Response::HTTP_OK); 
         } catch (Exception $e) {
             return response()->json(array("message" => "error"), Response::HTTP_NOT_FOUND);
         }
